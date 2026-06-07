@@ -5,25 +5,20 @@ async function trackEye() {
 
     const hud = document.getElementById('hud')
 
-    // ✅ 눈 위치 → 화면 변환
+    // ✅ 시선 좌표
     const x = (data.x / 640) * window.innerWidth
     const y = (data.y / 480) * window.innerHeight
 
-    // ✅ 시선 방향 이동
-    const targetX = x + data.dx * 1200
-    const targetY = y + data.dy * 1200
-
     // ✅ HUD 이동
-    hud.style.left = targetX + 'px'
-    hud.style.top = targetY + 'px'
+    hud.style.left = x + 'px'
+    hud.style.top = y + 'px'
 
-    // ✅ 3D 효과
-    hud.style.transform = `
-      translate(-50%, -50%)
-      rotateY(${data.dx * 50}deg)
-      rotateX(${data.dy * -50}deg)
-      scale(1.2)
-    `
+    // ✅ LOCK UI
+    if (data.target) {
+      hud.style.border = '3px solid red'
+    } else {
+      hud.style.border = 'none'
+    }
   } catch (e) {
     console.log('error')
   }
