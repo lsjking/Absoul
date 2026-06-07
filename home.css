@@ -1,0 +1,113 @@
+body {
+  margin: 0;
+  background: #0f172a;
+  color: white;
+  font-family: sans-serif;
+  text-align: center;
+}
+
+.hero {
+  padding-top: 100px; /* 위에서 살짝 내려오기 */
+  text-align: center;
+}
+.hero h1 {
+  font-size: 65px;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  font-size: 20px;
+}
+
+/* 검색 */
+.search-box {
+  margin-top: 20px;
+}
+
+input {
+  padding: 10px;
+  width: 250px;
+  border-radius: 10px;
+  border: none;
+}
+
+button {
+  padding: 10px 15px;
+  margin-left: 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+/* ✅ 기본 상태 (숨김 + 카드 디자인 포함) */
+.big-card {
+  width: 70%;
+  margin: 100px auto;
+  padding: 40px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.6s ease;
+}
+
+.small-card {
+  margin: 15px 0;
+  padding: 15px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.5s ease;
+}
+
+/* ✅ 스크롤 들어오면 등장 */
+.big-card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.small-card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ✅ 링크 카드 */
+.link-card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+/* ✅ hover 효과 */
+.small-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ✅ 검색 숨김 */
+.hidden {
+  display: none;
+}
+
+/* ✅ TOP 버튼 */
+#topBtn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: none;
+  font-size: 20px;
+  padding: 10px 15px;
+  border-radius: 10px;
+  background: #1e293b;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#topBtn:hover {
+  background: #38bdf8;
+  color: black;
+}

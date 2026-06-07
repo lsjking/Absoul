@@ -2,17 +2,63 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <title>JARVIS</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Portfolio Home</title>
+    <link rel="stylesheet" href="home.css" />
   </head>
 
   <body>
-    <!-- ✅ 영상 -->
-    <img id="video" src="http://127.0.0.1:5000/video" />
+    <!-- HERO + 검색 -->
+    <section class="hero">
+      <h1>🤖 임성준 AI Portfolio</h1>
+      <p>AI 보안 엔지니어를 향해</p>
 
-    <!-- ✅ 🔥 HUD 컨테이너 (여러 개 들어갈 자리) -->
-    <div id="hud-container"></div>
+      <div class="search-box">
+        <input type="text" id="search" placeholder="검색..." />
+        <button id="reset">초기화</button>
+      </div>
+    </section>
 
-    <script src="script.js"></script>
+    <!-- ✅ 목표 -->
+    <section class="section page">
+      <div class="big-card">
+        <h2>🎯 목표</h2>
+        <div class="small-card">모두가 안전한 세상</div>
+        <div class="small-card">AI 보안 엔지니어</div>
+        <div class="small-card">JARVIS AI 제작</div>
+      </div>
+    </section>
+
+    <!-- ✅ 기술 -->
+    <section class="section page">
+      <div class="big-card">
+        <h2>🛠 기술</h2>
+        <div class="small-card">Python</div>
+        <div class="small-card">AI / 딥러닝</div>
+        <div class="small-card">CAN 통신</div>
+      </div>
+    </section>
+
+    <!-- ✅ 프로젝트 -->
+    <section class="section page">
+      <div class="big-card">
+        <h2>📚 연구 / 프로젝트</h2>
+        <div class="small-card">음성 인식</div>
+        <div class="small-card">이미지 인식</div>
+        <div class="small-card">CAN 보안 분석</div>
+        <div class="small-card">데이터 기반 보안</div>
+
+        <a
+          href="https://blog.naver.com/"
+          target="_blank"
+          class="small-card link-card"
+        >
+          🔗 블로그 보기
+        </a>
+      </div>
+    </section>
+
+    <button id="topBtn">↑</button>
+    <script src="home.js"></script>
   </body>
 </html>
