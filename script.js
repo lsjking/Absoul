@@ -1,10 +1,8 @@
-// ✅ 클릭 함수
+// ✅ 클릭
 function setTarget(e) {
   fetch('http://127.0.0.1:5000/click', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       x: e.clientX,
       y: e.clientY,
@@ -14,43 +12,50 @@ function setTarget(e) {
   })
 }
 
-// ✅ 클릭 이벤트 등록
 document.body.addEventListener('click', setTarget)
 
-// ✅ ESC → 타겟 해제
+// ✅ ESC
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
-    fetch('http://127.0.0.1:5000/clear', {
-      method: 'POST',
-    })
+    fetch('http://127.0.0.1:5000/clear', { method: 'POST' })
   }
 })
 
-// ✅ HUD 이동 함수
+// ✅ HUD 여러 개 생성
 async function track() {
   try {
     const res = await fetch('http://127.0.0.1:5000/eye')
     const data = await res.json()
 
-    const hud = document.getElementById('hud')
+    const container = document.getElementById('hud-container')
+    container.innerHTML = ''
 
-    const x = (data.tx / data.w) * window.innerWidth
-    const y = (data.ty / data.h) * window.innerHeight
+    data.targets.forEach((t) => {
+      const hud = document.createElement('div')
+      hud.className = 'hud'
 
-    hud.style.left = x + 'px'
-    hud.style.top = y + 'px'
+      const x = (t.x / data.w) * window.innerWidth
+      const y = (t.y / data.h) * window.innerHeight
 
-    if (data.target) {
-      hud.style.transform = 'translate(-50%, -50%) scale(1.5)'
-      hud.style.boxShadow = '0 0 50px red'
-    } else {
-      hud.style.transform = 'translate(-50%, -50%) scale(1)'
-      hud.style.boxShadow = '0 0 20px orange'
-    }
+      const size = Math.max(t.w, t.h)
+
+      hud.style.left = x + 'px'
+      hud.style.top = y + 'px'
+      hud.style.width = size + 'px'
+      hud.style.height = size + 'px'
+
+      hud.innerHTML = `
+        <div class="ring big"></div>
+        <div class="ring mid"></div>
+        <div class="ring small"></div>
+        <div class="cross"></div>
+      `
+
+      container.appendChild(hud)
+    })
   } catch (e) {
-    console.log('error:', e)
+    console.log(e)
   }
 }
 
-// ✅ 반복 실행
 setInterval(track, 30)

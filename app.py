@@ -16,31 +16,30 @@ model = YOLO("yolov8n.pt")
 
 # ✅ HUD 데이터
 eye_data = {
-    "tx": 0,
-    "ty": 0,
+    "targets": [],
     "w": 640,
-    "h": 480,
-    "target": None
+    "h": 480
 }
 
-click_target = None
+click_targets = []   # ✅ 여러 개 저장
 last_boxes = []
 
+
 # ✅ 박스 비교 (오차 허용)
-def is_same_box(box1, box2):
-    if not box1 or not box2:
+def is_same_box(a, b):
+    if not a or not b:
         return False
 
-    x1,y1,x2,y2,_ = box1
-    a1,b1,a2,b2,_ = box2
+    x1,y1,x2,y2,_ = a
+    a1,b1,a2,b2,_ = b
 
-    return abs(x1-a1)<30 and abs(y1-b1)<30
+    return abs(x1-a1) < 30 and abs(y1-b1) < 30
 
 
-# ✅ 클릭 → 선택 / 변경 / 해제
+# ✅ 클릭
 @app.route("/click", methods=["POST"])
 def click():
-    global click_target, last_boxes
+    global click_targets, last_boxes
 
     data = request.json
 
@@ -52,7 +51,6 @@ def click():
 
     for box in last_boxes:
         x1, y1, x2, y2, name = box
-
         bx = (x1 + x2) // 2
         by = (y1 + y2) // 2
 
@@ -62,25 +60,30 @@ def click():
             min_dist = dist
             selected_box = box
 
-    # ✅ 토글 (오차 허용 비교)
-    if is_same_box(click_target, selected_box):
-        click_target = None
-    else:
-        click_target = selected_box
+    # ✅ 토글
+    found = False
+    for t in click_targets:
+        if is_same_box(t, selected_box):
+            click_targets.remove(t)
+            found = True
+            break
+
+    if not found and selected_box:
+        click_targets.append(selected_box)
 
     return "ok"
 
 
-# ✅ ESC → 강제 해제
+# ✅ ESC → 전체 제거
 @app.route("/clear", methods=["POST"])
 def clear():
-    global click_target
-    click_target = None
+    global click_targets
+    click_targets = []
     return "ok"
 
 
 def generate():
-    global eye_data, click_target, last_boxes
+    global eye_data, click_targets, last_boxes
 
     while True:
         ret, frame = cap.read()
@@ -92,49 +95,82 @@ def generate():
         eye_data["h"] = h
 
         results = model(frame)[0]
-
         last_boxes = []
 
-        # ✅ YOLO 탐지
+        # ✅ YOLO 객체 탐지
         for box in results.boxes:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             cls = int(box.cls[0])
             name = model.names[cls]
 
-            # 👉 필요하면 사용
+            # 사람 제거 (원하면 주석 처리)
             if name == "person":
                 continue
 
             last_boxes.append((x1, y1, x2, y2, name))
 
             # 파란 박스
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 100, 100), 2)
-            cv2.putText(frame, name, (x1, y1 - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 100, 100), 2)
+            cv2.rectangle(frame, (x1,y1), (x2,y2), (255,100,100), 2)
+            cv2.putText(frame, name, (x1, y1-10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,100,100), 2)
 
-        # ✅ 선택된 타겟
-        if click_target:
-            x1, y1, x2, y2, name = click_target
+        # ✅ ✅ ✅ 🔥 핵심: 추적 로직
+        eye_data["targets"] = []
+        new_targets = []
 
-            cx = (x1 + x2) // 2
-            cy = (y1 + y2) // 2
+        for target in click_targets:
+            best_match = None
+            min_dist = 999999
 
-            eye_data["tx"] = cx
-            eye_data["ty"] = cy
-            eye_data["target"] = name
+            tx1, ty1, tx2, ty2, tname = target
+            t_cx = (tx1 + tx2) // 2
+            t_cy = (ty1 + ty2) // 2
 
-            # 🔴 빨간 박스
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 3)
+            # 현재 프레임에서 같은 객체 다시 찾기
+            for box in last_boxes:
+                x1, y1, x2, y2, name = box
 
-        else:
-            eye_data["target"] = None
+                if name != tname:
+                    continue
 
-        # ✅ 고화질
-        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
-        _, buffer = cv2.imencode(".jpg", frame, encode_param)
+                cx = (x1 + x2) // 2
+                cy = (y1 + y2) // 2
 
-        yield (b"--frame\r\n"
-               b"Content-Type: image/jpeg\r\n\r\n" +
+                dist = (cx - t_cx)**2 + (cy - t_cy)**2
+
+                if dist < min_dist:
+                    min_dist = dist
+                    best_match = box
+
+            # 찾으면 추적
+            if best_match:
+                x1, y1, x2, y2, name = best_match
+
+                cx = (x1 + x2) // 2
+                cy = (y1 + y2) // 2
+                bw = x2 - x1
+                bh = y2 - y1
+
+                eye_data["targets"].append({
+                    "x": cx,
+                    "y": cy,
+                    "w": bw,
+                    "h": bh,
+                    "name": name
+                })
+
+                # 🔴 빨간 박스
+                cv2.rectangle(frame, (x1,y1), (x2,y2), (0,0,255), 3)
+
+                new_targets.append(best_match)
+
+        # ✅ 다음 프레임용 업데이트
+        click_targets = new_targets
+
+        # ✅ 고화질 인코딩
+        _, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+
+        yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" +
                buffer.tobytes() + b"\r\n")
 
 
