@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>수 시각화</title>
+    <link rel="stylesheet" href="sam.css" />
+  </head>
+
+  <body>
+    <button class="back-btn" onclick="history.back()">⬅️ 뒤로 가기</button>
+    <h1>📐 삼각함수 시각화</h1>
+
+    <!-- 슬라이더 -->
+    <div class="box">
+      <input type="range" id="angle" min="0" max="360" value="0" />
+      <span id="angleValue">0°</span>
+    </div>
+
+    <!-- 숫자 입력 -->
+    <div class="box">
+      <input
+        type="number"
+        id="angleInputBox"
+        min="0"
+        max="360"
+        placeholder="각도 입력"
+      />
+    </div>
+
+    <p id="result"></p>
+
+    <!-- ✅ 단위원 -->
+    <canvas id="circle" width="300" height="300"></canvas>
+
+    <!-- ✅ 그래프 -->
+    <canvas id="graph" width="600" height="300"></canvas>
+
+    <script src="sam.js"></script>
+  </body>
+</html>

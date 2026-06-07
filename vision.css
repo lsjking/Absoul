@@ -164,3 +164,20 @@ body {
 .hud.locked {
   transform: translate(-50%, -50%) scale(1.1);
 }
+.back-btn {
+  position: fixed; /* 🔥 핵심 */
+  top: 20px;
+  left: 20px;
+  z-index: 9999; /* 🔥 핵심 */
+
+  padding: 10px 15px;
+  border-radius: 10px;
+  border: none;
+  background: #1e293b;
+  color: white;
+  cursor: pointer;
+}
+.back-btn:hover {
+  background: #38bdf8;
+  color: black;
+}
