@@ -6,16 +6,13 @@ import mediapipe as mp
 app = Flask(__name__)
 CORS(app)
 
-# ✅ 카메라 (중요)
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
-# ✅ 카메라 확인
 if not cap.isOpened():
     print("❌ 카메라 열기 실패")
 else:
     print("✅ 카메라 연결 성공")
 
-# ✅ mediapipe
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(
     max_num_faces=1,
@@ -24,7 +21,6 @@ face_mesh = mp_face_mesh.FaceMesh(
 
 eye_pos = {"x": 0, "y": 0}
 
-# ✅ 영상 스트리밍 (에러 방지)
 def generate():
     global eye_pos
 
@@ -42,7 +38,7 @@ def generate():
             if result.multi_face_landmarks:
                 landmarks = result.multi_face_landmarks[0].landmark
 
-                eye = landmarks[468]  # 👁️ 눈 좌표
+                eye = landmarks[468]
 
                 eye_pos["x"] = int(eye.x * w)
                 eye_pos["y"] = int(eye.y * h)

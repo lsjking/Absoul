@@ -7,13 +7,22 @@
   </head>
 
   <body>
-    <!-- ✅ 반드시 img로 넣어야 영상 나옴 -->
+    <!-- ✅ 영상 -->
     <img id="video" src="http://127.0.0.1:5000/video" />
 
-    <!-- ✅ 눈 위치 -->
+    <!-- ✅ HUD -->
+    <div id="hud">
+      <div class="ring big"></div>
+      <div class="ring mid"></div>
+      <div class="ring small"></div>
+
+      <div class="cross"></div>
+      <div class="scan-line"></div>
+    </div>
+
+    <!-- ✅ 눈 위치 점 -->
     <div id="eye"></div>
 
     <script src="script.js"></script>
   </body>
 </html>
-``
