@@ -21,22 +21,22 @@ eye_data = {
     "h": 480
 }
 
-click_targets = []   # ✅ 여러 개 저장
+click_targets = []   # (x1,y1,x2,y2,name,state)
 last_boxes = []
 
 
-# ✅ 박스 비교 (오차 허용)
+# ✅ 박스 비교
 def is_same_box(a, b):
     if not a or not b:
         return False
 
-    x1,y1,x2,y2,_ = a
-    a1,b1,a2,b2,_ = b
+    x1,y1,x2,y2,_ = a[:5] if len(a) == 5 else a[:5]
+    a1,b1,a2,b2,_ = b[:5] if len(b) == 5 else b[:5]
 
     return abs(x1-a1) < 30 and abs(y1-b1) < 30
 
 
-# ✅ 클릭
+# ✅ 클릭 (TRACKING → LOCKED → 삭제)
 @app.route("/click", methods=["POST"])
 def click():
     global click_targets, last_boxes
@@ -51,30 +51,38 @@ def click():
 
     for box in last_boxes:
         x1, y1, x2, y2, name = box
-        bx = (x1 + x2) // 2
-        by = (y1 + y2) // 2
 
-        dist = (bx - cx) ** 2 + (by - cy) ** 2
+        bx = (x1 + x2)//2
+        by = (y1 + y2)//2
+
+        dist = (bx - cx)**2 + (by - cy)**2
 
         if dist < min_dist:
             min_dist = dist
             selected_box = box
 
-    # ✅ 토글
-    found = False
-    for t in click_targets:
+    # ✅ 상태 전환
+    for i, t in enumerate(click_targets):
         if is_same_box(t, selected_box):
-            click_targets.remove(t)
-            found = True
-            break
+            x1,y1,x2,y2,name,state = t
 
-    if not found and selected_box:
-        click_targets.append(selected_box)
+            if state == "TRACKING":
+                click_targets[i] = (x1,y1,x2,y2,name,"LOCKED")
+
+            elif state == "LOCKED":
+                click_targets.pop(i)
+
+            return "ok"
+
+    # ✅ 새로 추가 (TRACKING)
+    if selected_box:
+        x1,y1,x2,y2,name = selected_box
+        click_targets.append((x1,y1,x2,y2,name,"TRACKING"))
 
     return "ok"
 
 
-# ✅ ESC → 전체 제거
+# ✅ ESC 전체 제거
 @app.route("/clear", methods=["POST"])
 def clear():
     global click_targets
@@ -97,24 +105,22 @@ def generate():
         results = model(frame)[0]
         last_boxes = []
 
-        # ✅ YOLO 객체 탐지
+        # ✅ YOLO 탐지
         for box in results.boxes:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             cls = int(box.cls[0])
             name = model.names[cls]
 
-            # 사람 제거 (원하면 주석 처리)
             if name == "person":
                 continue
 
             last_boxes.append((x1, y1, x2, y2, name))
 
-            # 파란 박스
             cv2.rectangle(frame, (x1,y1), (x2,y2), (255,100,100), 2)
             cv2.putText(frame, name, (x1, y1-10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,100,100), 2)
 
-        # ✅ ✅ ✅ 🔥 핵심: 추적 로직
+        # ✅ 추적 + 상태 유지
         eye_data["targets"] = []
         new_targets = []
 
@@ -122,19 +128,19 @@ def generate():
             best_match = None
             min_dist = 999999
 
-            tx1, ty1, tx2, ty2, tname = target
-            t_cx = (tx1 + tx2) // 2
-            t_cy = (ty1 + ty2) // 2
+            tx1, ty1, tx2, ty2, tname, tstate = target
 
-            # 현재 프레임에서 같은 객체 다시 찾기
+            t_cx = (tx1 + tx2)//2
+            t_cy = (ty1 + ty2)//2
+
             for box in last_boxes:
                 x1, y1, x2, y2, name = box
 
                 if name != tname:
                     continue
 
-                cx = (x1 + x2) // 2
-                cy = (y1 + y2) // 2
+                cx = (x1 + x2)//2
+                cy = (y1 + y2)//2
 
                 dist = (cx - t_cx)**2 + (cy - t_cy)**2
 
@@ -142,33 +148,34 @@ def generate():
                     min_dist = dist
                     best_match = box
 
-            # 찾으면 추적
             if best_match:
                 x1, y1, x2, y2, name = best_match
 
-                cx = (x1 + x2) // 2
-                cy = (y1 + y2) // 2
+                cx = (x1 + x2)//2
+                cy = (y1 + y2)//2
                 bw = x2 - x1
                 bh = y2 - y1
 
+                # ✅ 상태 포함 전송
                 eye_data["targets"].append({
                     "x": cx,
                     "y": cy,
                     "w": bw,
                     "h": bh,
-                    "name": name
+                    "name": name,
+                    "state": tstate
                 })
 
-                # 🔴 빨간 박스
-                cv2.rectangle(frame, (x1,y1), (x2,y2), (0,0,255), 3)
+                # ✅ 색 변경
+                color = (0,0,255) if tstate == "LOCKED" else (0,200,0)
+                cv2.rectangle(frame, (x1,y1), (x2,y2), color, 3)
 
-                new_targets.append(best_match)
+                new_targets.append((x1,y1,x2,y2,name,tstate))
 
-        # ✅ 다음 프레임용 업데이트
         click_targets = new_targets
 
-        # ✅ 고화질 인코딩
-        _, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        _, buffer = cv2.imencode(".jpg", frame,
+            [int(cv2.IMWRITE_JPEG_QUALITY), 90])
 
         yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" +
                buffer.tobytes() + b"\r\n")

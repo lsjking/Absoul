@@ -1,4 +1,4 @@
-// ✅ 클릭 → 타겟 추가/제거// ✅ 클릭 → 타
+// ✅ 클릭 → 타겟 추가/제거
 function setTarget(e) {
   fetch('http://127.0.0.1:5000/click', {
     method: 'POST',
@@ -25,14 +25,14 @@ document.addEventListener('keydown', function (e) {
   }
 })
 
-// ✅ HUD 생성 + 추적 + 텍스트 표시
+// ✅ HUD 생성 + 상태 반영 + 색상 변경
 async function track() {
   try {
     const res = await fetch('http://127.0.0.1:5000/eye')
     const data = await res.json()
 
     const container = document.getElementById('hud-container')
-    container.innerHTML = '' // 기존 HUD 초기화
+    container.innerHTML = ''
 
     if (!data.targets) return
 
@@ -43,7 +43,7 @@ async function track() {
       const x = (t.x / data.w) * window.innerWidth
       const y = (t.y / data.h) * window.innerHeight
 
-      // ✅ 크기 비율 수정
+      // ✅ 크기 보정
       const base = Math.max(t.w, t.h)
       const size = Math.min(Math.max(base * 1.2, 60), 250)
 
@@ -52,18 +52,25 @@ async function track() {
       hud.style.width = size + 'px'
       hud.style.height = size + 'px'
 
-      // ✅ HTML escape 제거된 버전
-      hud.innerHTML = `
-    <div class="ring big"></div>
-    <div class="ring mid"></div>
-    <div class="ring small"></div>
-    <div class="cross"></div>
+      // ✅ 🔥 상태별 색상
+      const isLocked = t.state === 'LOCKED'
+      const ringColor = isLocked ? 'red' : 'orange'
+      const textColor = isLocked ? 'red' : '#00ff99'
 
-    <div class="label">
-      <div class="name">${t.name}</div>
-      <div class="status">TRACKING</div>
-    </div>
-  `
+      // ✅ 🔥 HTML 정상 (escape 제거)
+      hud.innerHTML = `
+        <div class="ring big" style="border-color:${ringColor}; box-shadow:0 0 20px ${ringColor}"></div>
+        <div class="ring mid" style="border-color:${ringColor}; box-shadow:0 0 20px ${ringColor}"></div>
+        <div class="ring small" style="border-color:${ringColor}; box-shadow:0 0 20px ${ringColor}"></div>
+        <div class="cross"></div>
+
+        <div class="label">
+          <div class="name">${t.name}</div>
+          <div class="status" style="color:${textColor}">
+            ${t.state}
+          </div>
+        </div>
+      `
 
       container.appendChild(hud)
     })
@@ -72,5 +79,5 @@ async function track() {
   }
 }
 
-// ✅ 반복 실행 (HUD 계속 업데이트)
+// ✅ 반복 실행
 setInterval(track, 30)

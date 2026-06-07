@@ -147,3 +147,20 @@ body {
     opacity: 1;
   }
 }
+/* ✅ 🔴 LOCKED 상태 */
+.hud.locked .ring {
+  border-color: red;
+  box-shadow:
+    0 0 30px red,
+    0 0 15px red;
+}
+
+.hud.locked .cross::before,
+.hud.locked .cross::after {
+  background: red;
+}
+
+/* ✅ LOCKED일 때 살짝 커짐 */
+.hud.locked {
+  transform: translate(-50%, -50%) scale(1.1);
+}
