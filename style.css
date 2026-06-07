@@ -1,3 +1,4 @@
+/* ✅ 전체 화면 */
 body {
   margin: 0;
   background: black;
@@ -6,15 +7,87 @@ body {
 
 #video {
   position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+/* ✅ HUD */
 #hud {
   position: absolute;
+  top: 0;
+  left: 0;
+
   width: 150px;
   height: 150px;
-  transform: translate(-50%, -50%);
-  transition: transform 0.2s ease;
+
+  pointer-events: none;
+  z-index: 999;
+
+  /* ✅ 중심 기준 */
+  transform: translate(-50%, -50%) scale(1);
+
+  /* ✅ 부드러움 */
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  /* ✅ 성능 */
+  will-change: transform;
+}
+
+/* ✅ 링 공통 */
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid orange;
+  box-shadow:
+    0 0 25px orange,
+    0 0 10px orange;
+}
+
+/* ✅ 큰 링 */
+.big {
+  width: 100%;
+  height: 100%;
+}
+
+/* ✅ 중간 링 */
+.mid {
+  width: 70%;
+  height: 70%;
+  top: 15%;
+  left: 15%;
+}
+
+/* ✅ 작은 링 */
+.small {
+  width: 40%;
+  height: 40%;
+  top: 30%;
+  left: 30%;
+}
+
+/* ✅ 십자선 */
+.cross::before,
+.cross::after {
+  content: '';
+  position: absolute;
+  background: orange;
+}
+
+/* 가로선 */
+.cross::before {
+  width: 100%;
+  height: 2px;
+  top: 50%;
+}
+
+/* 세로선 */
+.cross::after {
+  width: 2px;
+  height: 100%;
+  left: 50%;
 }
