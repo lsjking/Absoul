@@ -5,22 +5,23 @@ async function trackEye() {
 
     const hud = document.getElementById('hud')
 
-    // ✅ 시선 좌표
-    const x = (data.x / 640) * window.innerWidth
-    const y = (data.y / 480) * window.innerHeight
+    // ✅ 항상 타겟 중심 사용 (눈 없음)
+    const x = (data.tx / data.w) * window.innerWidth
+    const y = (data.ty / data.h) * window.innerHeight
 
-    // ✅ HUD 이동
     hud.style.left = x + 'px'
     hud.style.top = y + 'px'
 
-    // ✅ LOCK UI
+    // ✅ 타겟 표시
     if (data.target) {
-      hud.style.border = '3px solid red'
+      hud.style.transform = 'translate(-50%, -50%) scale(1.4)'
+      hud.style.boxShadow = '0 0 40px red'
     } else {
-      hud.style.border = 'none'
+      hud.style.transform = 'translate(-50%, -50%) scale(1)'
+      hud.style.boxShadow = '0 0 20px orange'
     }
   } catch (e) {
-    console.log('error')
+    console.log('error:', e)
   }
 }
 
