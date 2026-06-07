@@ -3,26 +3,26 @@ async function trackEye() {
     const res = await fetch('http://127.0.0.1:5000/eye')
     const data = await res.json()
 
-    const eye = document.getElementById('eye')
     const hud = document.getElementById('hud')
 
+    // ✅ 눈 위치 → 화면 변환
     const x = (data.x / 640) * window.innerWidth
     const y = (data.y / 480) * window.innerHeight
 
-    eye.style.left = x + 'px'
-    eye.style.top = y + 'px'
+    // ✅ 시선 방향 이동
+    const targetX = x + data.dx * 1200
+    const targetY = y + data.dy * 1200
 
-    hud.style.left = x + 'px'
-    hud.style.top = y + 'px'
+    // ✅ HUD 이동
+    hud.style.left = targetX + 'px'
+    hud.style.top = targetY + 'px'
 
-    // ✅ 🔥 3D 효과 핵심
-    const dx = data.x / 640 - 0.5
-    const dy = data.y / 480 - 0.5
-
+    // ✅ 3D 효과
     hud.style.transform = `
       translate(-50%, -50%)
-      rotateY(${dx * 30}deg)
-      rotateX(${dy * -30}deg)
+      rotateY(${data.dx * 50}deg)
+      rotateX(${data.dy * -50}deg)
+      scale(1.2)
     `
   } catch (e) {
     console.log('error')
