@@ -1,3 +1,15 @@
+const img = document.getElementById('video')
+
+const streamUrl = 'http://127.0.0.1:5000/video'
+const fallbackUrl = 'fallback.jpg'
+
+// ✅ 서버 꺼졌을 때 자동 fallback
+img.onerror = () => {
+  img.src = fallbackUrl
+}
+
+// ✅ 처음 실행
+img.src = streamUrl
 // ✅ 클릭 → 타겟 추가/제거
 function setTarget(e) {
   fetch('http://127.0.0.1:5000/click', {

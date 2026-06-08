@@ -111,8 +111,8 @@ def generate():
             cls = int(box.cls[0])
             name = model.names[cls]
 
-            if name == "person":
-                continue
+            # if name == "person":
+            #     continue
 
             last_boxes.append((x1, y1, x2, y2, name))
 
