@@ -1,110 +1,61 @@
 # 🎯 AI Target Tracking HUD
 
-## 📌 Project Overview
+## 📌 Overview
 
-이 프로젝트는 AI 이미지 인식 기술을 기반으로  
-실시간 영상에서 객체(타겟)를 추적하고  
+AI 이미지 인식을 활용해 영상 속 타겟을 추적하고  
 웹에서 HUD 형태로 시각화하는 시스템입니다.
-
-Python(OpenCV) 기반 백엔드에서 처리된 데이터를  
-JavaScript 프론트엔드에서 받아와
-
-👉 사용자 클릭 기반 타겟 지정  
-👉 실시간 위치 추적  
-👉 LOCKED 상태 시각화
-
-를 구현했습니다.
 
 ---
 
-## ⚙️ Tech Stack
+## ⚙️ Tech
 
-- Frontend: HTML, CSS, JavaScript
-- Backend: Python (Flask)
-- Computer Vision: OpenCV
-- Communication: REST API (Fetch)
+- HTML, CSS, JavaScript
+- Python (Flask)
+- OpenCV
 
 ---
 
 ## 🚀 Features
 
-- 📌 Click-based target selection  
-  → 사용자가 클릭한 위치를 타겟으로 설정
-
-- 🎯 Real-time tracking HUD  
-  → 서버 데이터를 기반으로 HUD 오버레이 표시
-
-- 🔴 Target state visualization  
-  → NORMAL / LOCKED 상태에 따라 색상 변경
-
-- ⌨️ ESC key control  
-  → 모든 타겟 초기화
-
-- 🔄 Live update (30ms interval)  
-  → 실시간 데이터 반영 및 HUD 갱신
+- 클릭으로 타겟 선택 및 삭제
+- 실시간 HUD 표시 (30ms)
+- LOCKED 상태 색상 변경
+- ESC 키로 전체 초기화
 
 ---
 
-## 🔄 How It Works
+## 🧠 JavaScript Implementation
 
-1. 사용자가 화면을 클릭하면 좌표가 서버로 전달됨
-2. 서버는 이미지 인식을 통해 타겟을 추적
-3. `/eye` API를 통해 타겟 정보를 반환
-4. 프론트엔드는 데이터를 받아 HUD 생성
-5. 30ms 간격으로 반복 실행하여 실시간 효과 구현
+### 📌 HUD 시스템
 
----
-
-## 📚 Implementation Details
-
-### 1. 사용자 입력 처리
-
-- `addEventListener`를 사용하여 클릭 이벤트 감지
-- 클릭 시 `setTarget` 함수가 실행되어 좌표를 서버에 전달
-- 서버는 해당 위치에 타겟을 추가
-
-- ESC 키 입력 시 `/clear` API 호출  
-  👉 모든 타겟 제거
+- `addEventListener`를 사용해 클릭 시 좌표를 서버로 전송 (타겟 생성)
+- `setInterval`을 이용해 30ms마다 데이터를 받아 HUD 갱신
+- DOM 조작으로 HUD 요소 동적 생성
+- 상태(state)에 따라 색상 변경 (LOCKED → 빨강)
 
 ---
 
-### 2. 실시간 데이터 처리
+### 📌 페이지 인터랙션 (home.js)
 
-- `setInterval(track, 30)`을 통해 30ms마다 반복 실행
-- `/eye` API를 통해 타겟 정보를 지속적으로 받아옴
-- 데이터를 기반으로 HUD를 동적으로 렌더링
-
----
-
-### 3. HUD 렌더링
-
-- 서버 좌표를 화면 크기에 맞게 변환하여 위치 계산
-- 타겟 크기(`w`, `h`)를 기반으로 HUD 크기 자동 조정
-- 최소 / 최대 크기 제한을 통해 화면 안정성 유지
+- `IntersectionObserver`로 스크롤 기반 애니메이션 구현
+- 카드가 화면에 들어오면 순차적으로 등장, 벗어나면 제거
+- 검색 기능 → 입력값 기준 섹션 필터링
+- 초기화 버튼 → 검색 상태 리셋
+- TOP 버튼 → 스크롤 위치 기반 표시 + 부드러운 이동
 
 ---
 
-### 4. 상태 기반 UI 변경
+### 📌 삼각함수 시각화 (sam.js)
 
-- 타겟 상태(`state`)에 따라 색상 변경
-  - 일반 상태 → 주황색
-  - LOCKED 상태 → 빨간색
-
-👉 상태를 직관적으로 시각화
+- 슬라이더와 입력창을 동기화하여 각도 입력 처리
+- `Math.sin`, `cos`, `tan`을 사용한 실시간 계산
+- Canvas를 활용해 단위원(원)과 그래프 직접 렌더링
+- sin, cos, tan 값을 좌표 및 그래프로 시각화
+- tan 그래프는 급격한 변화 구간을 끊어서 자연스럽게 표현
 
 ---
 
-## 💡 Description
+## 🔄 Flow
 
-이 프로젝트는 단순한 UI 구현이 아닌  
-AI 기반 이미지 인식 결과를 웹에 실시간으로 반영하는 구조를 설계하고 구현했습니다.
-
-특히,
-
-- 영상 스트림 처리
-- 사용자 인터랙션
-- 서버-클라이언트 통신
-- 실시간 렌더링
-
-을 통합하여  
-아이언맨 HUD 스타일의 인터페이스를 구현한 것이 핵심입니다.
+클릭 → 서버로 좌표 전송 → AI가 타겟 추적 →  
+데이터 반환 → HUD로 실시간 표시
